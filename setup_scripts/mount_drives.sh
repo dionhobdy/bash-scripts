@@ -28,7 +28,7 @@ while true; do
         [Yy]* ) read -p "Enter name of drive: " drive;
                 read -p "Enter the folder location: " location;
                 echo
-                sudo mount /dev/$drive location; break;;
+                sudo mount /dev/$drive $location; break;;
         # If no, state that user is exiting script and thank them for using Mount_Drives.
         [Nn]* ) echo "Exiting. Thank you for using Mount_Drives!"; exit;;
             # If user answers neither, let the user know that they need to enter yes or no.
