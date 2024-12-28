@@ -31,10 +31,10 @@ while true; do
                 sudo mount /dev/$drive location; break;;
         # If no, state that user is exiting script and thank them for using Mount_Drives.
         [Nn]* ) echo "Exiting. Thank you for using Mount_Drives!"; exit;;
-            # If user answers neighter, let the user know that they need to enter yes or no.
+            # If user answers neither, let the user know that they need to enter yes or no.
         * ) echo "Invalid response. Please enter y or n.";;
+        # Escape when exit condition is met.
         esac
     done
-
 
 
