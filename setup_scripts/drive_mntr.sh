@@ -48,6 +48,20 @@ A script by Dion Hobdy [ https://github.com/dionhobdy ]
 EOF
 echo #
 
+# backup fstab, keeping only the 5 most recent backups
+echo "💾 Backing up /etc/fstab..."
+sudo ls -t /etc/fstab.bak.* | tail -n +6 | xargs sudo rm -f
+sudo cp /etc/fstab "/etc/fstab.bak.$(date +%Y%m%d%H%M%S)"
+echo "✅ Backup complete."
+echo #
+
+# create ~/ext_drives directory if it doesn't exist
+if [ ! -d "~/ext_drives" ]; then
+    echo "📂 Creating ~/ext_drives directory..."
+    mkdir ~/ext_drives
+    echo #
+fi
+echo "📁 Changing to ~/ext_drives directory..."
 cd ~/ext_drives || exit 1
 
 while true; do
@@ -56,11 +70,22 @@ while true; do
 
     echo #
 
-    # prompt user asking if they want to mount a drive
-    read -p "Would you like to mount a drive? (y/n): " mount_choice
+    # prompt user asking for input
+    read -p "(M)ount drive, (U)nmount drive, or (E)xit? [M/U/E]: " mount_choice
 
     case "$mount_choice" in
-        [yY]|[yY][eE][sS])
+        [uU]|[uU][nN][mM][oO][uU][nN][tT])
+            # list currently mounted drives
+            echo #
+            # prompt user to enter the device name to unmount
+            read -p "Enter the device name to unmount [e.g. sdX1]: " unmount_device
+            echo #
+            # unmount the specified device
+            sudo umount "/dev/$unmount_device"
+            echo "✅ Unmounted /dev/$unmount_device"
+            echo #
+            ;;
+        [mM]|[mM][oO][uU][nN][tT])
             # prompt user to select a listed
             read -p "Enter the device name [e.g. sdX1]: " device
             echo #
@@ -86,7 +111,7 @@ while true; do
             read -p "Are you sure you want to mount $device? (y/n): " confirm_mount
             # if the user does not confirm dive mount, cancel and exit
             if [[ ! "$confirm_mount" =~ ^[yY]|[yY][eE][sS]$ ]]; then
-                echo "🚫 Mounting cancelled. Exiting script."
+                echo "🚫 Mounting cancelled."
                 echo #
                 break
             fi
@@ -118,13 +143,12 @@ while true; do
                 echo "🕒 Mount will not persist after reboot."
             fi
             ;;
-        [nN]|[nN][oO])
-            echo "🚫 No drive will be mounted. Exiting script."
-            echo #
+        [eE]|[eE][xX][iI][tT])
+            echo "👋 Exiting script. Goodbye!"
             break
             ;;
         *)
-            echo "⚠️ Invalid choice. Please enter y or n."
+            echo "⚠️ Invalid choice. Please enter [M/U/E]."
             echo #
             ;;
     esac
