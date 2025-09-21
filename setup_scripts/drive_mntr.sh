@@ -1,3 +1,4 @@
+
 #!/bin/bash
 # drv_mntr.sh
 # a simple script to display drive information and mount drives
@@ -132,13 +133,17 @@ while true; do
                 # get filesystem type
                 fstype=$(sudo blkid -s TYPE -o value "/dev/$device")
                 # create fstab entry
-                fstab_entry="UUID=$uuid /home/ext_drives/$mount_point $fstype defaults 0 2"
-                # backup fstab before modifying
+                fstab_entry="UUID=$uuid /home/ext_drives/$mount_point $fstype defaults,nofail,x-systemd.device-timeout=5 0 2"                # backup fstab before modifying
                 sudo cp /etc/fstab /etc/fstab.bak
                 # append entry to fstab
-                echo "$fstab_entry" | sudo tee -a /etc/fstab > /dev/null
-                echo "📌 Persistent mount added to /etc/fstab:"
-                echo "$fstab_entry"
+                # validate UUID and mount point before writing to fstab
+                if [ -n "$uuid" ] && [ -d "/home/ext_drives/$mount_point" ]; then
+                    echo "$fstab_entry" | sudo tee -a /etc/fstab | tee -a ~/fstab_changes.log > /dev/null
+                    echo "📌 Persistent mount added to /etc/fstab:"
+                    echo "$fstab_entry"
+                else
+                    echo "❌ Invalid UUID or mount point. Skipping fstab entry."
+                fi
             else
                 echo "🕒 Mount will not persist after reboot."
             fi
